@@ -9,6 +9,7 @@ O processo atual de ETL é manual e consome muito tempo. Além disso, pode haver
 
 ## Utilização:
 * Toda a análise e o processo de ETL foi diponibilizada no notebook `lotofacil.ipynb` presente dentro da pasta Notebook
+* Para utilizar basta clonar o repositório e executar run all
   
 ## 👀 Em breve 
 * Em versões futuras o ETL será feito atravez de um app.py;
