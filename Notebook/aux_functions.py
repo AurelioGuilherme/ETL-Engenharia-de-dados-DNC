@@ -5,6 +5,7 @@ Funções auxiliares criadas para a análise e ETL dos dados do case técnico pa
 # import libs
 import pandas as pd
 import os
+import unicodedata
 
 
 def carregar_dados_xlsx():
@@ -196,6 +197,98 @@ def verifica_data(df, columns):
     else:
         # Imprimi que os dados estão dentro do padrão
         print("\nFormato da data esta dentro padrão: dd/mm/yyyy")
+
+
+def transform_data_type(df, col_data_sorteio="Data Sorteio"):
+    """
+    A Função foi criada para transformar os dados Data Sorteio em um formato e tipo datetime.
+    Caso a função não consiga efetuar a transformação exibira um erro sobre a falha.
+
+    Args: 
+        df -> DataFrame pandas: Conjunto de dados
+        col_data_sorteio -> str: Nome da coluna correspondente (default = 'Data Sorteio')
+    
+    returns:
+        DataFrame com a coluna correspondente a data de sorteio convertida  para um formato data
+    
+    """
+    # Nome do tipo do dado desejado
+    condicao_type = "datetime64[ns]"
+    
+    try:
+        # Tenta transformar a coluna em um formato de data
+        data_transformed = pd.to_datetime(df[col_data_sorteio], dayfirst=True)
+        
+        # Verifica se o tipo de dado é datetime64[ns] (desejado), caso sim transforma o dado original e exibi que a transformação foi bem sucedida 
+        if data_transformed.dtypes == condicao_type:
+            df[col_data_sorteio] = data_transformed
+            print("A transformação para data foi bem-sucedida.")
+        else:
+            print("A transformação não resultou em datetime64[ns].")
+    except Exception as e:
+        # Captura qualquer exceção que possa ocorrer durante a transformação
+        print(f"Erro durante a transformação: {str(e)}")
+
+
+def remover_acentos_e_especiais(texto):
+    """
+    Função para remoção de caracteres especiais
+    args:
+        texto -> string: 
+    return:
+        texto sem caracteres especiais    
+    """
+    # Verifica cada caracter do texto se possui caracteres especiais
+    texto_sem_acentos = ''.join((c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn'))
+    return ''.join(e for e in texto_sem_acentos if e.isalnum() or e.isspace()).upper()
+
+def dividir_cidade_uf(valor):
+    """
+    Função para dividir o conjunto de dados em cidades e UF únicos.
+    args:
+        valor -> string: contendo informações de uf_cidade separados por;
+    
+    retorns:
+        DataFrame contendo valores únicos de cidades e UF
+        Caso não houver valores adiona o valor não especificado
+    
+    """
+    # Verifica se o valor não é nulo
+    if pd.notna(valor):
+        # Separa string por ;  
+        partes = valor.split(";")
+        # Armazena valores únicos de cidades
+        cidades = set()  
+        # Armazena valores únicos de UFs
+        ufs = set()    
+        
+        # Itera por cada string separa por ';' anteriormente
+        for parte in partes:
+            cidade_uf = parte.strip()
+            # Verifica se existe '/' na string, caso houver separa em cidade e UF
+            if "/" in cidade_uf:
+                try:
+                    cidade, uf = cidade_uf.split("/")
+                    # Garante que os valores estejam em maiúsculas e sem caracteres especiais
+                    cidade = remover_acentos_e_especiais(cidade)
+                    uf = remover_acentos_e_especiais(uf)
+                    # Adiciona os valores em cidades
+                    cidades.add(cidade)
+                    # adiciona os valores em ufs
+                    ufs.add(uf)
+                except ValueError:
+                    # IMprimi mensagem de erro caso houver mostrando a linha/index
+                    print(f"Falha na conversão na linha: {valor}")
+            else:
+                # Caso não houver valores adiciona o valor NÃO ESPECIFICADA
+                cidades.add("CIDADE NAO ESPECIFICADA")
+                ufs.add(cidade_uf)
+        # Retorna valores separados de cidade e valores
+        return pd.Series({'Cidade': ", ".join(cidades), 'UF': ", ".join(ufs)})
+    else:
+        # Caso o valor for nulo retorna Nâo especificado
+        return pd.Series({'Cidade': "CIDADE NAO ESPECIFICADA", 'UF': "UF NAO ESPECIFICADA"})
+
         
     
 
