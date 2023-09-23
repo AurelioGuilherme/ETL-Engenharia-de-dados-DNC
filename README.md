@@ -7,8 +7,13 @@ A PotatoCore é uma empresa que lida com dados da Lotofácil, um jogo de loteria
 
 O processo atual de ETL é manual e consome muito tempo. Além disso, pode haver inconsistências nos dados devido à natureza manual do processo. O objetivo é criar um pipeline automatizado que permita a extração, transformação e carregamento eficientes dos dados da Lotofácil para facilitar a análise.
 
-
 ## Utilização:
+* Toda a análise e o processo de ETL foi diponibilizada no notebook `lotofacil.ipynb` presente dentro da pasta Notebook
+  
+## 👀 Em breve 
+* Em versões futuras o ETL será feito atravez de um app.py;
+* Também esta em processo de desenvolvimento o processo de ETL em um container Docker utilizando o Apache Airflow
+
 ### Docker
 O Docker é uma plataforma de virtualização de aplicativos que simplifica a criação, distribuição e execução de aplicativos em ambientes isolados chamados de contêineres. Ao invés de virtualizar todo o sistema operacional, como faz a virtualização tradicional, o Docker virtualiza apenas os recursos necessários para executar um aplicativo específico. Isso inclui o sistema de arquivos, as bibliotecas e as dependências.
 
