@@ -6,6 +6,7 @@ Funções auxiliares criadas para a análise e ETL dos dados do case técnico pa
 import pandas as pd
 import os
 import unicodedata
+import re
 
 
 def carregar_dados_xlsx():
@@ -288,8 +289,71 @@ def dividir_cidade_uf(valor):
     else:
         # Caso o valor for nulo retorna Nâo especificado
         return pd.Series({'Cidade': "CIDADE NAO ESPECIFICADA", 'UF': "UF NAO ESPECIFICADA"})
+    
+def remove_cifrao(df, cols_to_transform):
+    """
+    Função faz a remoção do R$ e converte para  Float os dados em colunas específicas de um DataFrame.
+    Mostra o erro caso a transformação não seja bem-sucedida.
 
-        
+    Args:
+        df (DataFrame): O DataFrame de entrada.
+        cols_to_transform (list): Lista das colunas a serem transformadas.
+
+    Returns:
+        DataFrame: Um novo DataFrame com as colunas processadas.
+    """
+    # Cria uma cópia do DataFrame original para não modificar o original
+    new_df = df.copy()  
+
+    # Itera sobre as colunas especificadas
+    for col in cols_to_transform:
+        # Verifica se a coluna esta dentro do dataframe
+        if col in new_df.columns:
+            try:
+                # Faz a transformação do dado, remove R$ substitui primeiramente `.` por vazio e depois substitui `,` por `.` apos isso converte para float
+                new_df[col] = new_df[col].apply(lambda x: float(x.replace("R$", "").replace(".", "").replace(",", ".").strip())\
+                                                 if isinstance(x, str) and "R$" in x else x)
+            except ValueError as e:
+                print(f"Erro na coluna '{col}': {e}")
+
+    return new_df
+
+
+def categorize_observacao(df):
+    """
+    Função que trata a coluna 'Observação' de um DataFrame, convertendo para maiúsculas, removendo caracteres especiais e categorizando as mensagens.
+
+    Args:
+        df (DataFrame): O DataFrame de entrada com a coluna 'Observação'.
+
+    Returns:
+        DataFrame: Um novo DataFrame com a coluna 'Observação' tratada e uma nova coluna 'Categoria'.
+    """
+    # Cria uma cópia do DataFrame original para não modificar o original
+    new_df = df.copy() 
+
+    # Função para categorizar as observações
+    def categorize(observation):
+        # Converte para letras maiúsculas
+        observation = observation.upper()  
+
+        # Remove caracteres especiais
+        observation = re.sub(r'[^A-Z0-9\s/]', '', observation)
+
+        # Categoria 1: Acumulou
+        if 'ACU' in observation:
+            return 1  # Categoria 1: Acumulou
+        elif 'POST' in observation:
+            return 2  # Categoria 2: Postergado
+        elif re.search(r'\b[AC-PR-UW-Z]{2}\/[A-Z]{2}\b', observation):
+            return 3  # Categoria 3: Possui dados de UF e cidade do ganhador
+        elif 'GANH' in observation:
+            return 4  # Categoria 4: Ganhador
+        else:
+            return 0  # Categoria 0: Outros
+
+    new_df['Observacao_code'] = new_df['Observação'].fillna('').apply(categorize)
+    return new_df        
     
 
     
