@@ -15,7 +15,7 @@ O processo atual de ETL é manual e consome muito tempo. Além disso, pode haver
 * Em versões futuras o ETL será feito atravez de um app.py;
 * Também esta em processo de desenvolvimento o processo de ETL em um container Docker utilizando o Apache Airflow
 
-### Docker
+### Docker - BETA
 O Docker é uma plataforma de virtualização de aplicativos que simplifica a criação, distribuição e execução de aplicativos em ambientes isolados chamados de contêineres. Ao invés de virtualizar todo o sistema operacional, como faz a virtualização tradicional, o Docker virtualiza apenas os recursos necessários para executar um aplicativo específico. Isso inclui o sistema de arquivos, as bibliotecas e as dependências.
 
 Para utilizar o processo de ETL é necessário instalar o [Docker Desktop](https://www.docker.com/)
